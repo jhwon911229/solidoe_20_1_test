@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 만들기 - TripSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html">
+                    <i class="fas fa-plane"></i>
+                    <span>TripSync</span>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">내 여행</a>
+                <a href="create-trip.html" class="nav-link active">여행 만들기</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Create Trip Section -->
+    <section class="create-trip-section">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-plus-circle"></i> 새 여행 만들기</h1>
+                <p>당신만의 완벽한 여행을 계획해보세요</p>
+            </div>
+
+            <form id="createTripForm" class="trip-form">
+                <!-- Step 1: Basic Information -->
+                <div class="form-section active" data-step="1">
+                    <div class="form-section-header">
+                        <h3><i class="fas fa-info-circle"></i> 기본 정보</h3>
+                        <span class="step-indicator">1/4</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tripTitle">여행 제목 *</label>
+                        <input
+                            type="text"
+                            id="tripTitle"
+                            placeholder="예: 부산 여름휴가"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="travelers">여행 인원</label>
+                            <input
+                                type="number"
+                                id="travelers"
+                                value="1"
+                                min="1"
+                                max="20"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="budget">예산 (KRW) *</label>
+                            <input
+                                type="number"
+                                id="budget"
+                                placeholder="1000000"
+                                min="0"
+                                step="10000"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                        다음 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Locations -->
+                <div class="form-section" data-step="2">
+                    <div class="form-section-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> 출발지 & 목적지</h3>
+                        <span class="step-indicator">2/4</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="origin">출발지 *</label>
+                        <input
+                            type="text"
+                            id="origin"
+                            placeholder="예: 서울"
+                            required
+                        >
+                        <small>도시 이름 또는 주소를 입력하세요</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destination">목적지 *</label>
+                        <input
+                            type="text"
+                            id="destination"
+                            placeholder="예: 부산"
+                            required
+                        >
+                        <small>도시 이름 또는 주소를 입력하세요</small>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                            <i class="fas fa-arrow-left"></i> 이전
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                            다음 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Dates -->
+                <div class="form-section" data-step="3">
+                    <div class="form-section-header">
+                        <h3><i class="fas fa-calendar-alt"></i> 여행 기간</h3>
+                        <span class="step-indicator">3/4</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">출발일 *</label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">도착일 *</label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="date-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="tripDuration">여행 기간: -</span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i> 이전
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                            다음 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Preferences -->
+                <div class="form-section" data-step="4">
+                    <div class="form-section-header">
+                        <h3><i class="fas fa-sliders-h"></i> 여행 선호도</h3>
+                        <span class="step-indicator">4/4</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>여행 스타일</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="travelStyle" value="adventure" checked>
+                                <span><i class="fas fa-mountain"></i> 모험 추구형</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="travelStyle" value="relaxation">
+                                <span><i class="fas fa-spa"></i> 휴식 추구형</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="travelStyle" value="culture">
+                                <span><i class="fas fa-landmark"></i> 문화 체험형</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="travelStyle" value="balanced">
+                                <span><i class="fas fa-balance-scale"></i> 균형잡힌</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>관심사 (다중 선택 가능)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="food">
+                                <span><i class="fas fa-utensils"></i> 맛집 탐방</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="nature">
+                                <span><i class="fas fa-tree"></i> 자연/경치</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="culture">
+                                <span><i class="fas fa-theater-masks"></i> 문화/역사</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="shopping">
+                                <span><i class="fas fa-shopping-bag"></i> 쇼핑</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="nightlife">
+                                <span><i class="fas fa-cocktail"></i> 나이트라이프</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="interests" value="photo">
+                                <span><i class="fas fa-camera"></i> 사진 촬영</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>교통수단 선호도</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="transportation" value="car" checked>
+                                <span><i class="fas fa-car"></i> 자동차</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="transportation" value="bus" checked>
+                                <span><i class="fas fa-bus"></i> 버스</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="transportation" value="train" checked>
+                                <span><i class="fas fa-train"></i> 기차</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="transportation" value="flight">
+                                <span><i class="fas fa-plane"></i> 비행기</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="errorMessage" class="error-message" style="display:none;"></div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                            <i class="fas fa-arrow-left"></i> 이전
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                            <i class="fas fa-check"></i> 여행 만들기
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress" id="progressBar" style="width: 25%"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/create-trip.js"></script>
+</body>
+</html>
