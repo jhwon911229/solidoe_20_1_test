@@ -10,6 +10,13 @@ let stats = {
     temperature: { maxCpu: 0, maxGpu: 0 }
 };
 
+// HTML escape function to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Initialize charts
 function initCharts() {
     const commonOptions = {
@@ -254,10 +261,9 @@ async function fetchResources() {
         // Update last update time
         document.getElementById('last-update').textContent = data.timestamp;
 
-        // Update system info
-        document.getElementById('system-info').innerHTML = `
-            ${data.system.platform} | ${data.system.distro} | ${data.system.arch}
-        `;
+        // Update system info - using textContent to prevent XSS
+        document.getElementById('system-info').textContent =
+            `${data.system.platform} | ${data.system.distro} | ${data.system.arch}`;
 
         // Update CPU card
         document.getElementById('cpu-value').textContent = data.cpu.usage + '%';
@@ -293,25 +299,25 @@ async function fetchResources() {
             </div>
         `;
 
-        // Update disk table
+        // Update disk table - with HTML escaping to prevent XSS
         const diskTableBody = document.getElementById('disk-table-body');
         diskTableBody.innerHTML = data.disk.details.map(disk => `
             <tr>
-                <td>${disk.fs}</td>
-                <td>${disk.type}</td>
-                <td>${disk.size}</td>
-                <td>${disk.used}</td>
-                <td>${disk.use}</td>
+                <td>${escapeHtml(disk.fs)}</td>
+                <td>${escapeHtml(disk.type)}</td>
+                <td>${escapeHtml(disk.size)}</td>
+                <td>${escapeHtml(disk.used)}</td>
+                <td>${escapeHtml(disk.use)}</td>
             </tr>
         `).join('');
 
-        // Update network table
+        // Update network table - with HTML escaping to prevent XSS
         const networkTableBody = document.getElementById('network-table-body');
         networkTableBody.innerHTML = data.network.interfaces.map(iface => `
             <tr>
-                <td>${iface.iface}</td>
-                <td>${iface.rx_sec}</td>
-                <td>${iface.tx_sec}</td>
+                <td>${escapeHtml(iface.iface)}</td>
+                <td>${escapeHtml(iface.rx_sec)}</td>
+                <td>${escapeHtml(iface.tx_sec)}</td>
             </tr>
         `).join('');
 
@@ -320,6 +326,12 @@ async function fetchResources() {
 
     } catch (error) {
         console.error('Error fetching resources:', error);
+        // Show user-friendly error message
+        const lastUpdate = document.getElementById('last-update');
+        if (lastUpdate) {
+            lastUpdate.textContent = 'Connection error';
+            lastUpdate.style.color = '#ef4444';
+        }
     }
 }
 
