@@ -4,3 +4,6 @@ node_modules/
 monitoring-report-*.html
 monitoring-screenshot.png
 *.pdf
+.env.local
+dist/
+build/
