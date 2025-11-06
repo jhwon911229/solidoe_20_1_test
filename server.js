@@ -170,7 +170,28 @@ app.get('/api/history', (req, res) => {
     res.json(historyData);
 });
 
+// Endpoint to download standalone HTML file
+app.get('/download', (req, res) => {
+    const fs = require('fs');
+
+    // Read all necessary files
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    const css = fs.readFileSync(path.join(__dirname, 'public', 'style.css'), 'utf8');
+    const js = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+
+    // Create standalone HTML with embedded CSS and JS
+    const standaloneHTML = html
+        .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
+        .replace('<script src="app.js"></script>', `<script>${js}</script>`);
+
+    // Set headers for download
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', 'attachment; filename="system-monitor-standalone.html"');
+    res.send(standaloneHTML);
+});
+
 app.listen(PORT, () => {
     console.log(`System Resource Monitor running at http://localhost:${PORT}`);
     console.log(`Monitoring started at ${new Date().toLocaleString()}`);
+    console.log(`Download standalone HTML: http://localhost:${PORT}/download`);
 });
