@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>추천 장소 - TripSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html">
+                    <i class="fas fa-plane"></i>
+                    <span>TripSync</span>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">내 여행</a>
+                <a href="#" class="nav-link" id="backToTrip">여행 상세</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Recommendations Section -->
+    <section class="recommendations-section">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-star"></i> AI 맞춤 추천</h1>
+                <p id="tripTitle">당신을 위한 특별한 장소들</p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <i class="fas fa-th"></i> 전체
+                </button>
+                <button class="filter-tab" data-filter="restaurant">
+                    <i class="fas fa-utensils"></i> 맛집
+                </button>
+                <button class="filter-tab" data-filter="attraction">
+                    <i class="fas fa-landmark"></i> 관광지
+                </button>
+                <button class="filter-tab" data-filter="accommodation">
+                    <i class="fas fa-hotel"></i> 숙소
+                </button>
+                <button class="filter-tab" data-filter="activity">
+                    <i class="fas fa-hiking"></i> 액티비티
+                </button>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="sort-options">
+                <span>정렬:</span>
+                <select id="sortSelect">
+                    <option value="score">추천 점수순</option>
+                    <option value="rating">평점순</option>
+                    <option value="price-low">가격 낮은순</option>
+                    <option value="price-high">가격 높은순</option>
+                </select>
+            </div>
+
+            <!-- Generate Recommendations Button -->
+            <div class="generate-section">
+                <button class="btn btn-primary" id="generateBtn" onclick="generateRecommendations()">
+                    <i class="fas fa-magic"></i> AI 추천 생성하기
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state" style="display:none;">
+                <div class="spinner"></div>
+                <p>AI가 맞춤 추천을 생성하는 중...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-lightbulb"></i>
+                <h3>아직 추천이 없습니다</h3>
+                <p>AI 추천을 생성하여 당신에게 딱 맞는 장소를 찾아보세요!</p>
+            </div>
+
+            <!-- Recommendations Grid -->
+            <div id="recommendationsGrid" class="recommendations-grid" style="display:none;">
+                <!-- Recommendation cards will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendation Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-info">
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="modalLocation"></span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-star"></i>
+                        <span id="modalRating"></span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-won-sign"></i>
+                        <span id="modalPrice"></span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-clock"></i>
+                        <span id="modalDuration"></span>
+                    </div>
+                </div>
+                <div class="detail-description">
+                    <h4>설명</h4>
+                    <p id="modalDescription"></p>
+                </div>
+                <div class="detail-tags">
+                    <h4>태그</h4>
+                    <div id="modalTags" class="tags-container"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">닫기</button>
+                <button class="btn btn-primary" onclick="addToItinerary()">
+                    <i class="fas fa-plus"></i> 일정에 추가
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/recommendations.js"></script>
+</body>
+</html>

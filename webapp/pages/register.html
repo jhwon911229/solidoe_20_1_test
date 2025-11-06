@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - TripSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html">
+                    <i class="fas fa-plane"></i>
+                    <span>TripSync</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Register Section -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <i class="fas fa-user-plus"></i>
+                    <h2>회원가입</h2>
+                    <p>TripSync와 함께 여행을 시작하세요</p>
+                </div>
+
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="fas fa-user"></i> 이름
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="홍길동"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> 이메일
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="email@example.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> 비밀번호
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="8자 이상의 비밀번호"
+                            minlength="8"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> 비밀번호 확인
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="비밀번호를 다시 입력하세요"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox">
+                            <input type="checkbox" id="agree" required>
+                            <span><a href="#" class="link">이용약관</a> 및 <a href="#" class="link">개인정보처리방침</a>에 동의합니다</span>
+                        </label>
+                    </div>
+
+                    <div id="errorMessage" class="error-message" style="display:none;"></div>
+                    <div id="successMessage" class="success-message" style="display:none;"></div>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="registerBtn">
+                        <i class="fas fa-user-plus"></i> 회원가입
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>또는</span>
+                </div>
+
+                <div class="auth-social">
+                    <button class="btn btn-social btn-google">
+                        <i class="fab fa-google"></i> Google로 가입하기
+                    </button>
+                    <button class="btn btn-social btn-facebook">
+                        <i class="fab fa-facebook"></i> Facebook으로 가입하기
+                    </button>
+                </div>
+
+                <div class="auth-footer">
+                    <p>이미 계정이 있으신가요? <a href="login.html" class="link">로그인</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const registerBtn = document.getElementById('registerBtn');
+
+            // Clear previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 가입 중...';
+
+            try {
+                const result = await register(name, email, password);
+
+                if (result.success) {
+                    successMessage.textContent = '회원가입이 완료되었습니다! 로그인 페이지로 이동합니다...';
+                    successMessage.style.display = 'block';
+
+                    // Redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    errorMessage.textContent = result.message || '회원가입에 실패했습니다.';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = '회원가입 중 오류가 발생했습니다.';
+                errorMessage.style.display = 'block';
+            } finally {
+                if (!document.getElementById('successMessage').style.display) {
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> 회원가입';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

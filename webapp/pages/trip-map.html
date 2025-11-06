@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지도 - TripSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html">
+                    <i class="fas fa-plane"></i>
+                    <span>TripSync</span>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">내 여행</a>
+                <a href="#" class="nav-link" id="backToTrip">여행 상세</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Map Section -->
+    <section class="map-section">
+        <div class="map-container">
+            <!-- Transportation Mode Selector -->
+            <div class="transport-selector">
+                <button class="transport-btn active" data-mode="DRIVING">
+                    <i class="fas fa-car"></i>
+                    <span>자동차</span>
+                </button>
+                <button class="transport-btn" data-mode="TRANSIT">
+                    <i class="fas fa-bus"></i>
+                    <span>대중교통</span>
+                </button>
+                <button class="transport-btn" data-mode="WALKING">
+                    <i class="fas fa-walking"></i>
+                    <span>도보</span>
+                </button>
+                <button class="transport-btn" data-mode="BICYCLING">
+                    <i class="fas fa-bicycle"></i>
+                    <span>자전거</span>
+                </button>
+            </div>
+
+            <!-- Map -->
+            <div id="map" class="google-map"></div>
+
+            <!-- Route Information Panel -->
+            <div class="route-info-panel" id="routeInfo" style="display:none;">
+                <div class="route-info-header">
+                    <h3><i class="fas fa-route"></i> 경로 정보</h3>
+                    <button class="close-btn" onclick="closeRouteInfo()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="route-info-content">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-road"></i>
+                        </div>
+                        <div class="info-details">
+                            <span class="info-label">거리</span>
+                            <span class="info-value" id="routeDistance">-</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-details">
+                            <span class="info-label">소요 시간</span>
+                            <span class="info-value" id="routeDuration">-</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-won-sign"></i>
+                        </div>
+                        <div class="info-details">
+                            <span class="info-label">예상 비용</span>
+                            <span class="info-value" id="routeCost">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="route-directions" id="routeDirections">
+                    <h4>상세 경로</h4>
+                    <div id="directionsList" class="directions-list">
+                        <!-- Directions will be inserted here -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="saveRoute()">
+                    <i class="fas fa-save"></i> 경로 저장
+                </button>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+                <div class="spinner"></div>
+                <p>경로를 계산하는 중...</p>
+            </div>
+        </div>
+
+        <!-- Trip Details Sidebar -->
+        <div class="trip-sidebar" id="tripSidebar">
+            <div class="sidebar-header">
+                <h3 id="tripTitle">여행 정보</h3>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="trip-location">
+                    <div class="location-item">
+                        <i class="fas fa-map-marker-alt origin-marker"></i>
+                        <div>
+                            <span class="location-label">출발지</span>
+                            <span class="location-name" id="originName">-</span>
+                        </div>
+                    </div>
+                    <div class="location-divider">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </div>
+                    <div class="location-item">
+                        <i class="fas fa-map-marker-alt destination-marker"></i>
+                        <div>
+                            <span class="location-label">목적지</span>
+                            <span class="location-name" id="destinationName">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trip-dates">
+                    <div class="date-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="tripDates">-</span>
+                    </div>
+                    <div class="date-item">
+                        <i class="fas fa-wallet"></i>
+                        <span id="tripBudget">-</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-secondary btn-block" id="viewRecommendations">
+                        <i class="fas fa-star"></i> 추천 장소 보기
+                    </a>
+                    <a href="#" class="btn btn-secondary btn-block" id="viewBudget">
+                        <i class="fas fa-chart-pie"></i> 예산 관리
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMGooquPgD4C4lNL9sEdKr--2DTCr8djk&libraries=places"></script>
+    <script src="../js/trip-map.js"></script>
+</body>
+</html>

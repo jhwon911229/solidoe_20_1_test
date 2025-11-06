@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예산 관리 - TripSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html">
+                    <i class="fas fa-plane"></i>
+                    <span>TripSync</span>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">내 여행</a>
+                <a href="#" class="nav-link" id="backToTrip">여행 상세</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Budget Section -->
+    <section class="budget-section">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-wallet"></i> 예산 관리</h1>
+                <p id="tripTitle">스마트한 예산 계획으로 알뜰한 여행하기</p>
+            </div>
+
+            <!-- Budget Overview -->
+            <div class="budget-overview">
+                <div class="budget-card total">
+                    <div class="budget-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="budget-info">
+                        <span class="budget-label">총 예산</span>
+                        <span class="budget-value" id="totalBudget">₩0</span>
+                    </div>
+                </div>
+
+                <div class="budget-card spent">
+                    <div class="budget-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="budget-info">
+                        <span class="budget-label">예상 지출</span>
+                        <span class="budget-value" id="totalSpent">₩0</span>
+                    </div>
+                </div>
+
+                <div class="budget-card remaining">
+                    <div class="budget-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="budget-info">
+                        <span class="budget-label">남은 예산</span>
+                        <span class="budget-value" id="remaining">₩0</span>
+                    </div>
+                </div>
+
+                <div class="budget-card daily">
+                    <div class="budget-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="budget-info">
+                        <span class="budget-label">일일 예산</span>
+                        <span class="budget-value" id="dailyBudget">₩0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Progress -->
+            <div class="budget-progress-section">
+                <h3>예산 사용률</h3>
+                <div class="progress-container">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="budgetProgress" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-percentage" id="budgetPercentage">0%</span>
+                </div>
+                <div class="progress-status" id="progressStatus"></div>
+            </div>
+
+            <!-- Budget Charts -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>카테고리별 예산 분포</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>일별 예산 계획</h3>
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="category-breakdown">
+                <h3>카테고리별 상세 내역</h3>
+
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                        <div class="category-info">
+                            <span class="category-name">교통</span>
+                            <span class="category-amount" id="transportCost">₩0</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-bar" id="transportBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="category-info">
+                            <span class="category-name">식사</span>
+                            <span class="category-amount" id="foodCost">₩0</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-bar" id="foodBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-hotel"></i>
+                        </div>
+                        <div class="category-info">
+                            <span class="category-name">숙박</span>
+                            <span class="category-amount" id="accommodationCost">₩0</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-bar" id="accommodationBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div class="category-info">
+                            <span class="category-name">관광</span>
+                            <span class="category-amount" id="attractionCost">₩0</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-bar" id="attractionBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-hiking"></i>
+                        </div>
+                        <div class="category-info">
+                            <span class="category-name">액티비티</span>
+                            <span class="category-amount" id="activityCost">₩0</span>
+                        </div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="category-bar" id="activityBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Optimization -->
+            <div class="optimization-section">
+                <h3>예산 최적화 제안</h3>
+                <div id="optimizationTips" class="tips-container">
+                    <!-- Tips will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> 뒤로 가기
+                </button>
+                <button class="btn btn-primary" onclick="optimizeBudget()">
+                    <i class="fas fa-magic"></i> 예산 최적화
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/budget.js"></script>
+</body>
+</html>
