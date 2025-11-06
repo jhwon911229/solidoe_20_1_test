@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+monitoring-report-*.html
+monitoring-screenshot.png
+*.pdf
