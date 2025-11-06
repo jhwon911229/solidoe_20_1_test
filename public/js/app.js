@@ -410,7 +410,8 @@ class TripSyncApp {
                             ${this.getPriceLevelSymbol(rec.priceLevel)}
                         </div>
                     </div>
-                    <p>${rec.cuisine || rec.category || rec.stars + '성급'}</p>
+                    ${rec.description ? `<p class="rec-description">${rec.description}</p>` : ''}
+                    <p class="rec-category">${rec.cuisine || rec.category || rec.stars + '성급'}</p>
                     <div class="recommendation-distance">
                         <i class="fas fa-location-dot"></i>
                         <span>${rec.distance}km</span>

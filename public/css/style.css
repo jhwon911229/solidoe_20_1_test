@@ -55,6 +55,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     color: var(--primary-color);
+    position: relative;
 }
 
 .logo i {
@@ -64,6 +65,29 @@ body {
 .logo h1 {
     font-size: 1.8rem;
     font-weight: 700;
+}
+
+.demo-badge {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #e67e22 100%);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.5);
+    }
 }
 
 .nav {
@@ -103,6 +127,34 @@ body {
 /* Main Content */
 .main {
     padding: 2rem 0;
+}
+
+/* Demo Notice */
+.demo-notice {
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.95) 0%, rgba(230, 126, 34, 0.95) 100%);
+    color: var(--white);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
+.demo-notice-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.demo-notice-content i {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.demo-notice-content div {
+    line-height: 1.6;
+}
+
+.demo-notice-content strong {
+    font-weight: 700;
 }
 
 .tab-content {
@@ -473,6 +525,26 @@ body {
     color: var(--white);
 }
 
+.trip-status.confirmed {
+    background: var(--success-color);
+    color: var(--white);
+}
+
+.trip-status.in_progress {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.trip-status.completed {
+    background: var(--gray-color);
+    color: var(--white);
+}
+
+.trip-status.cancelled {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
 .no-data {
     background: var(--white);
     padding: 4rem 2rem;
@@ -579,6 +651,20 @@ body {
 
 .price-level {
     color: var(--success-color);
+}
+
+.recommendation-body .rec-description {
+    color: var(--gray-color);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.recommendation-body .rec-category {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
 }
 
 .recommendation-body p {
