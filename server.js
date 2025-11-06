@@ -1,197 +1,264 @@
 const express = require('express');
 const cors = require('cors');
-const si = require('systeminformation');
 const path = require('path');
+const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
+// Middleware
 app.use(cors());
-app.use(express.static('public'));
 app.use(express.json());
+app.use(express.static('public'));
 
-// Store historical data
-const historyData = {
-    timestamps: [],
-    cpu: [],
-    memory: [],
-    disk: [],
-    network: { rx: [], tx: [] },
-    temperatures: []
+// Mock database for trips
+let trips = [];
+let tripIdCounter = 1;
+
+// Mock database for recommendations
+const mockRecommendations = {
+  restaurants: [
+    { id: 1, name: '맛있는 식당', rating: 4.5, priceLevel: 2, cuisine: '한식', distance: 0.5 },
+    { id: 2, name: '글로벌 레스토랑', rating: 4.3, priceLevel: 3, cuisine: '양식', distance: 1.2 },
+    { id: 3, name: '전통 맛집', rating: 4.7, priceLevel: 2, cuisine: '중식', distance: 0.8 },
+  ],
+  attractions: [
+    { id: 1, name: '역사 박물관', rating: 4.6, priceLevel: 1, category: '문화', distance: 2.1 },
+    { id: 2, name: '시티 타워', rating: 4.4, priceLevel: 2, category: '관광', distance: 1.5 },
+    { id: 3, name: '공원', rating: 4.8, priceLevel: 0, category: '자연', distance: 0.7 },
+  ],
+  hotels: [
+    { id: 1, name: '럭셔리 호텔', rating: 4.7, priceLevel: 4, stars: 5, distance: 1.0 },
+    { id: 2, name: '비즈니스 호텔', rating: 4.3, priceLevel: 3, stars: 4, distance: 0.6 },
+    { id: 3, name: '게스트하우스', rating: 4.5, priceLevel: 2, stars: 3, distance: 1.8 },
+  ]
 };
 
-const maxDataPoints = 300; // 5 minutes at 1 second intervals
+// API Routes
 
-// Endpoint to get current system resources
-app.get('/api/resources', async (req, res) => {
-    try {
-        const [cpu, mem, disk, network, temp, currentLoad, osInfo] = await Promise.all([
-            si.cpu(),
-            si.mem(),
-            si.fsSize(),
-            si.networkStats(),
-            si.cpuTemperature(),
-            si.currentLoad(),
-            si.osInfo()
-        ]);
+// Get API configuration
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY
+  });
+});
 
-        const timestamp = new Date().toLocaleTimeString();
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'TripSync Travel Planner API'
+  });
+});
 
-        // CPU data - with null/undefined check
-        let cpuUsageValue = 0;
-        if (currentLoad) {
-            if (typeof currentLoad.currentLoad === 'number' && !isNaN(currentLoad.currentLoad)) {
-                cpuUsageValue = currentLoad.currentLoad;
-            } else if (typeof currentLoad.avgLoad === 'number' && !isNaN(currentLoad.avgLoad)) {
-                cpuUsageValue = currentLoad.avgLoad;
-            } else if (Array.isArray(currentLoad.cpus) && currentLoad.cpus.length > 0) {
-                // Calculate average from individual CPU loads
-                const totalLoad = currentLoad.cpus.reduce((sum, cpu) => sum + (cpu.load || 0), 0);
-                cpuUsageValue = totalLoad / currentLoad.cpus.length;
-            }
-        }
-        const cpuUsage = cpuUsageValue.toFixed(2);
+// Get all trips
+app.get('/api/trips', (req, res) => {
+  res.json(trips);
+});
 
-        // Memory data - with safety checks
-        const memTotal = mem && mem.total ? (mem.total / (1024 ** 3)).toFixed(2) : '0';
-        const memUsed = mem && mem.used && mem.total
-            ? ((mem.used / mem.total) * 100).toFixed(2)
-            : '0';
-        const memUsedGB = mem && mem.used ? (mem.used / (1024 ** 3)).toFixed(2) : '0';
-        const memAvailable = mem && mem.available && mem.total
-            ? ((mem.available / mem.total) * 100).toFixed(2)
-            : '0';
+// Get single trip
+app.get('/api/trips/:id', (req, res) => {
+  const trip = trips.find(t => t.id === parseInt(req.params.id));
+  if (!trip) {
+    return res.status(404).json({ error: 'Trip not found' });
+  }
+  res.json(trip);
+});
 
-        // Disk data - with safety checks
-        let diskUsed = 0;
-        let diskTotal = 0;
-        if (disk && Array.isArray(disk) && disk.length > 0) {
-            diskTotal = disk.reduce((sum, d) => sum + (d.size || 0), 0);
-            diskUsed = disk.reduce((sum, d) => sum + (d.used || 0), 0);
-        }
-        const diskUsedPercent = diskTotal > 0 ? ((diskUsed / diskTotal) * 100).toFixed(2) : '0';
-        const diskUsedGB = (diskUsed / (1024 ** 3)).toFixed(2);
-        const diskTotalGB = (diskTotal / (1024 ** 3)).toFixed(2);
+// Create new trip
+app.post('/api/trips', (req, res) => {
+  const { title, origin, destination, startDate, endDate, budget } = req.body;
 
-        // Network data - with safety checks
-        let networkRx = 0;
-        let networkTx = 0;
-        if (network && Array.isArray(network) && network.length > 0) {
-            networkRx = network.reduce((sum, n) => sum + (n.rx_sec || 0), 0);
-            networkTx = network.reduce((sum, n) => sum + (n.tx_sec || 0), 0);
-        }
-        const networkRxMB = (networkRx / (1024 ** 2)).toFixed(2);
-        const networkTxMB = (networkTx / (1024 ** 2)).toFixed(2);
+  if (!title || !origin || !destination || !startDate || !endDate || !budget) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
 
-        // Temperature data - with safety checks
-        const cpuTemp = (temp && (temp.main || (temp.cores && temp.cores[0]))) || 0;
-        const gpuTemp = (temp && temp.gpu) || 0;
+  const newTrip = {
+    id: tripIdCounter++,
+    title,
+    origin,
+    destination,
+    startDate,
+    endDate,
+    budget: parseFloat(budget),
+    status: 'planning',
+    itinerary: [],
+    createdAt: new Date().toISOString()
+  };
 
-        // Store in history
-        historyData.timestamps.push(timestamp);
-        historyData.cpu.push(parseFloat(cpuUsage));
-        historyData.memory.push(parseFloat(memUsed));
-        historyData.disk.push(parseFloat(diskUsedPercent));
-        historyData.network.rx.push(networkRx);
-        historyData.network.tx.push(networkTx);
-        historyData.temperatures.push({ cpu: cpuTemp, gpu: gpuTemp });
+  trips.push(newTrip);
+  res.status(201).json(newTrip);
+});
 
-        // Keep only last maxDataPoints
-        if (historyData.timestamps.length > maxDataPoints) {
-            historyData.timestamps.shift();
-            historyData.cpu.shift();
-            historyData.memory.shift();
-            historyData.disk.shift();
-            historyData.network.rx.shift();
-            historyData.network.tx.shift();
-            historyData.temperatures.shift();
-        }
+// Update trip
+app.put('/api/trips/:id', (req, res) => {
+  const tripIndex = trips.findIndex(t => t.id === parseInt(req.params.id));
+  if (tripIndex === -1) {
+    return res.status(404).json({ error: 'Trip not found' });
+  }
 
-        const data = {
-            timestamp,
-            cpu: {
-                usage: cpuUsage,
-                cores: cpu && cpu.cores ? cpu.cores : 'N/A',
-                model: cpu ? `${cpu.manufacturer || 'Unknown'} ${cpu.brand || ''}`.trim() : 'Unknown CPU',
-                speed: cpu && cpu.speed ? `${cpu.speed} GHz` : 'N/A'
-            },
-            memory: {
-                used: memUsed,
-                usedGB: memUsedGB,
-                totalGB: memTotal,
-                available: memAvailable
-            },
-            disk: {
-                used: diskUsedPercent,
-                usedGB: diskUsedGB,
-                totalGB: diskTotalGB,
-                details: (disk && Array.isArray(disk)) ? disk.map(d => ({
-                    fs: d.fs || 'Unknown',
-                    type: d.type || 'Unknown',
-                    size: ((d.size || 0) / (1024 ** 3)).toFixed(2) + ' GB',
-                    used: ((d.used || 0) / (1024 ** 3)).toFixed(2) + ' GB',
-                    use: (d.use || 0).toFixed(2) + '%'
-                })) : []
-            },
-            network: {
-                rxMB: networkRxMB,
-                txMB: networkTxMB,
-                interfaces: (network && Array.isArray(network)) ? network.map(n => ({
-                    iface: n.iface || 'Unknown',
-                    rx_sec: ((n.rx_sec || 0) / 1024).toFixed(2) + ' KB/s',
-                    tx_sec: ((n.tx_sec || 0) / 1024).toFixed(2) + ' KB/s'
-                })) : []
-            },
-            temperature: {
-                cpu: cpuTemp,
-                gpu: gpuTemp
-            },
-            system: {
-                platform: osInfo && osInfo.platform ? osInfo.platform : 'Unknown',
-                distro: osInfo && osInfo.distro ? osInfo.distro : 'Unknown',
-                arch: osInfo && osInfo.arch ? osInfo.arch : 'Unknown',
-                hostname: osInfo && osInfo.hostname ? osInfo.hostname : 'Unknown'
-            }
-        };
+  trips[tripIndex] = {
+    ...trips[tripIndex],
+    ...req.body,
+    updatedAt: new Date().toISOString()
+  };
 
-        res.json(data);
-    } catch (error) {
-        console.error('Error fetching system resources:', error);
-        res.status(500).json({
-            error: 'Failed to fetch system resources',
-            timestamp: new Date().toISOString(),
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+  res.json(trips[tripIndex]);
+});
+
+// Delete trip
+app.delete('/api/trips/:id', (req, res) => {
+  const tripIndex = trips.findIndex(t => t.id === parseInt(req.params.id));
+  if (tripIndex === -1) {
+    return res.status(404).json({ error: 'Trip not found' });
+  }
+
+  trips.splice(tripIndex, 1);
+  res.json({ message: 'Trip deleted successfully' });
+});
+
+// Get route information using Google Maps Directions API
+app.post('/api/routes/calculate', async (req, res) => {
+  const { origin, destination, mode = 'driving' } = req.body;
+
+  if (!origin || !destination) {
+    return res.status(400).json({ error: 'Origin and destination are required' });
+  }
+
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
+      params: {
+        origin: `${origin.lat},${origin.lng}`,
+        destination: `${destination.lat},${destination.lng}`,
+        mode: mode,
+        key: GOOGLE_MAPS_API_KEY
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      const route = response.data.routes[0];
+      const leg = route.legs[0];
+
+      res.json({
+        distance: leg.distance.text,
+        duration: leg.duration.text,
+        steps: leg.steps.map(step => ({
+          instruction: step.html_instructions.replace(/<[^>]*>/g, ''),
+          distance: step.distance.text,
+          duration: step.duration.text,
+          mode: step.travel_mode
+        })),
+        polyline: route.overview_polyline.points
+      });
+    } else {
+      res.status(400).json({ error: 'Could not calculate route' });
     }
+  } catch (error) {
+    console.error('Route calculation error:', error.message);
+    res.status(500).json({ error: 'Failed to calculate route' });
+  }
 });
 
-// Endpoint to get historical data
-app.get('/api/history', (req, res) => {
-    res.json(historyData);
+// Get recommendations
+app.get('/api/recommendations', (req, res) => {
+  const { type, lat, lng, budget } = req.query;
+
+  let recommendations = [];
+
+  switch (type) {
+    case 'restaurants':
+      recommendations = mockRecommendations.restaurants;
+      break;
+    case 'attractions':
+      recommendations = mockRecommendations.attractions;
+      break;
+    case 'hotels':
+      recommendations = mockRecommendations.hotels;
+      break;
+    default:
+      recommendations = [
+        ...mockRecommendations.restaurants.slice(0, 2),
+        ...mockRecommendations.attractions.slice(0, 2),
+        ...mockRecommendations.hotels.slice(0, 1)
+      ];
+  }
+
+  // Filter by budget if provided
+  if (budget) {
+    const maxPrice = parseInt(budget);
+    recommendations = recommendations.filter(r => r.priceLevel <= maxPrice);
+  }
+
+  res.json(recommendations);
 });
 
-// Endpoint to download standalone HTML file
-app.get('/download', (req, res) => {
-    const fs = require('fs');
+// Search places using Google Maps Places API
+app.get('/api/places/search', async (req, res) => {
+  const { query, location } = req.query;
 
-    // Read all necessary files
-    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
-    const css = fs.readFileSync(path.join(__dirname, 'public', 'style.css'), 'utf8');
-    const js = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+  if (!query) {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
 
-    // Create standalone HTML with embedded CSS and JS
-    const standaloneHTML = html
-        .replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
-        .replace('<script src="app.js"></script>', `<script>${js}</script>`);
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
+      params: {
+        query: query,
+        location: location,
+        key: GOOGLE_MAPS_API_KEY
+      }
+    });
 
-    // Set headers for download
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Content-Disposition', 'attachment; filename="system-monitor-standalone.html"');
-    res.send(standaloneHTML);
+    if (response.data.status === 'OK') {
+      const places = response.data.results.map(place => ({
+        id: place.place_id,
+        name: place.name,
+        address: place.formatted_address,
+        lat: place.geometry.location.lat,
+        lng: place.geometry.location.lng,
+        rating: place.rating,
+        types: place.types
+      }));
+
+      res.json(places);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Places search error:', error.message);
+    res.status(500).json({ error: 'Failed to search places' });
+  }
 });
 
+// Get place details
+app.get('/api/places/:placeId', async (req, res) => {
+  const { placeId } = req.params;
+
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+      params: {
+        place_id: placeId,
+        key: GOOGLE_MAPS_API_KEY
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      res.json(response.data.result);
+    } else {
+      res.status(404).json({ error: 'Place not found' });
+    }
+  } catch (error) {
+    console.error('Place details error:', error.message);
+    res.status(500).json({ error: 'Failed to get place details' });
+  }
+});
+
+// Start server
 app.listen(PORT, () => {
-    console.log(`System Resource Monitor running at http://localhost:${PORT}`);
-    console.log(`Monitoring started at ${new Date().toLocaleString()}`);
-    console.log(`Download standalone HTML: http://localhost:${PORT}/download`);
+  console.log(`🚀 TripSync Server is running on http://localhost:${PORT}`);
+  console.log(`📍 Google Maps API Key: ${GOOGLE_MAPS_API_KEY ? '✓ Configured' : '✗ Missing'}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

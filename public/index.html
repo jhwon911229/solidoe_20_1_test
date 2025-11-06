@@ -3,168 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시스템 리소스 모니터</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>TripSync - 개인 맞춤형 여행 플래너</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🖥️ 시스템 리소스 모니터</h1>
-            <div class="header-info">
-                <div class="timer">
-                    <span class="label">모니터링 시간:</span>
-                    <span id="elapsed-time" class="value">00:00</span>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-plane-departure"></i>
+                    <h1>TripSync</h1>
                 </div>
-                <div class="system-info" id="system-info"></div>
-            </div>
-            <div class="button-group">
-                <button id="export-pdf" class="export-btn">📄 PDF로 내보내기</button>
-                <a href="/download" class="export-btn download-btn" download>💾 HTML 파일 다운로드</a>
-            </div>
-        </header>
-
-        <div id="content">
-            <div class="dashboard">
-                <!-- Real-time Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card cpu">
-                        <div class="stat-header">
-                            <span class="stat-icon">⚙️</span>
-                            <h3>CPU</h3>
-                        </div>
-                        <div class="stat-value" id="cpu-value">0%</div>
-                        <div class="stat-details" id="cpu-details"></div>
-                        <div class="stat-bar">
-                            <div class="stat-bar-fill cpu-bar" id="cpu-bar"></div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card memory">
-                        <div class="stat-header">
-                            <span class="stat-icon">💾</span>
-                            <h3>메모리</h3>
-                        </div>
-                        <div class="stat-value" id="memory-value">0%</div>
-                        <div class="stat-details" id="memory-details"></div>
-                        <div class="stat-bar">
-                            <div class="stat-bar-fill memory-bar" id="memory-bar"></div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card disk">
-                        <div class="stat-header">
-                            <span class="stat-icon">💿</span>
-                            <h3>디스크</h3>
-                        </div>
-                        <div class="stat-value" id="disk-value">0%</div>
-                        <div class="stat-details" id="disk-details"></div>
-                        <div class="stat-bar">
-                            <div class="stat-bar-fill disk-bar" id="disk-bar"></div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card network">
-                        <div class="stat-header">
-                            <span class="stat-icon">🌐</span>
-                            <h3>네트워크</h3>
-                        </div>
-                        <div class="stat-value" id="network-value">
-                            <div class="network-stats">
-                                <span class="download">⬇️ 0 MB/s</span>
-                                <span class="upload">⬆️ 0 MB/s</span>
-                            </div>
-                        </div>
-                        <div class="stat-details" id="network-details"></div>
-                    </div>
-
-                    <div class="stat-card temperature">
-                        <div class="stat-header">
-                            <span class="stat-icon">🌡️</span>
-                            <h3>온도</h3>
-                        </div>
-                        <div class="stat-value" id="temp-value">
-                            <div class="temp-stats">
-                                <span class="cpu-temp">CPU: 0°C</span>
-                                <span class="gpu-temp">GPU: 0°C</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div class="charts-section">
-                    <div class="chart-container">
-                        <h3>CPU 사용률 추이</h3>
-                        <canvas id="cpu-chart"></canvas>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3>메모리 사용률 추이</h3>
-                        <canvas id="memory-chart"></canvas>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3>네트워크 트래픽</h3>
-                        <canvas id="network-chart"></canvas>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3>온도 모니터링</h3>
-                        <canvas id="temp-chart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Detailed Tables -->
-                <div class="tables-section">
-                    <div class="table-container">
-                        <h3>💿 디스크 상세 정보</h3>
-                        <table id="disk-table">
-                            <thead>
-                                <tr>
-                                    <th>파일시스템</th>
-                                    <th>타입</th>
-                                    <th>크기</th>
-                                    <th>사용량</th>
-                                    <th>사용률</th>
-                                </tr>
-                            </thead>
-                            <tbody id="disk-table-body"></tbody>
-                        </table>
-                    </div>
-
-                    <div class="table-container">
-                        <h3>🌐 네트워크 인터페이스</h3>
-                        <table id="network-table">
-                            <thead>
-                                <tr>
-                                    <th>인터페이스</th>
-                                    <th>다운로드</th>
-                                    <th>업로드</th>
-                                </tr>
-                            </thead>
-                            <tbody id="network-table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Statistics Summary -->
-                <div class="summary-section">
-                    <h3>📊 모니터링 통계</h3>
-                    <div class="summary-grid" id="summary-stats">
-                        <!-- Will be populated dynamically -->
-                    </div>
-                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" data-tab="planner">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>여행 계획</span>
+                    </button>
+                    <button class="nav-btn" data-tab="trips">
+                        <i class="fas fa-suitcase"></i>
+                        <span>내 여행</span>
+                    </button>
+                    <button class="nav-btn" data-tab="recommendations">
+                        <i class="fas fa-star"></i>
+                        <span>추천</span>
+                    </button>
+                    <button class="nav-btn" data-tab="budget">
+                        <i class="fas fa-wallet"></i>
+                        <span>예산 관리</span>
+                    </button>
+                </nav>
             </div>
         </div>
+    </header>
 
-        <footer>
-            <p>실시간 시스템 리소스 모니터링 | 마지막 업데이트: <span id="last-update">-</span></p>
-        </footer>
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Trip Planner Tab -->
+        <section id="planner-tab" class="tab-content active">
+            <div class="container">
+                <div class="planner-container">
+                    <!-- Left Panel: Trip Form -->
+                    <div class="planner-panel">
+                        <div class="panel-header">
+                            <h2><i class="fas fa-route"></i> 여행 계획 만들기</h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="trip-form">
+                                <div class="form-group">
+                                    <label for="trip-title">
+                                        <i class="fas fa-tag"></i> 여행 제목
+                                    </label>
+                                    <input type="text" id="trip-title" placeholder="예: 서울 주말 여행" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="origin">
+                                        <i class="fas fa-map-marker-alt"></i> 출발지
+                                    </label>
+                                    <input type="text" id="origin" placeholder="출발지를 검색하세요" required>
+                                    <div id="origin-results" class="search-results"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="destination">
+                                        <i class="fas fa-flag-checkered"></i> 목적지
+                                    </label>
+                                    <input type="text" id="destination" placeholder="목적지를 검색하세요" required>
+                                    <div id="destination-results" class="search-results"></div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="start-date">
+                                            <i class="fas fa-calendar-alt"></i> 출발일
+                                        </label>
+                                        <input type="date" id="start-date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="end-date">
+                                            <i class="fas fa-calendar-check"></i> 도착일
+                                        </label>
+                                        <input type="date" id="end-date" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="budget">
+                                        <i class="fas fa-dollar-sign"></i> 예산 (원)
+                                    </label>
+                                    <input type="number" id="budget" placeholder="500000" min="0" step="10000" required>
+                                    <div class="budget-slider">
+                                        <input type="range" id="budget-slider" min="0" max="5000000" step="100000" value="500000">
+                                        <div class="budget-labels">
+                                            <span>0원</span>
+                                            <span id="budget-display">500,000원</span>
+                                            <span>500만원</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-heart"></i> 여행 선호도
+                                    </label>
+                                    <div class="preferences">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="interests" value="문화"> 문화/역사
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="interests" value="자연"> 자연/풍경
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="interests" value="음식"> 맛집 탐방
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="interests" value="쇼핑"> 쇼핑
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="interests" value="액티비티"> 액티비티
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> 여행 경로 탐색
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Map and Route -->
+                    <div class="map-panel">
+                        <div class="panel-header">
+                            <h2><i class="fas fa-globe"></i> 경로 미리보기</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div id="map" class="map-container"></div>
+
+                            <div id="route-info" class="route-info" style="display: none;">
+                                <h3><i class="fas fa-info-circle"></i> 경로 정보</h3>
+                                <div class="route-stats">
+                                    <div class="stat">
+                                        <i class="fas fa-road"></i>
+                                        <div>
+                                            <span class="stat-label">거리</span>
+                                            <span class="stat-value" id="route-distance">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat">
+                                        <i class="fas fa-clock"></i>
+                                        <div>
+                                            <span class="stat-label">소요시간</span>
+                                            <span class="stat-value" id="route-duration">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat">
+                                        <i class="fas fa-won-sign"></i>
+                                        <div>
+                                            <span class="stat-label">예상 비용</span>
+                                            <span class="stat-value" id="route-cost">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Trips Tab -->
+        <section id="trips-tab" class="tab-content">
+            <div class="container">
+                <div class="trips-header">
+                    <h2><i class="fas fa-suitcase"></i> 내 여행 목록</h2>
+                </div>
+                <div id="trips-list" class="trips-grid"></div>
+                <div id="no-trips" class="no-data">
+                    <i class="fas fa-plane"></i>
+                    <p>아직 계획된 여행이 없습니다.</p>
+                    <button class="btn btn-primary" onclick="switchTab('planner')">
+                        <i class="fas fa-plus"></i> 새 여행 계획하기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recommendations Tab -->
+        <section id="recommendations-tab" class="tab-content">
+            <div class="container">
+                <div class="recommendations-header">
+                    <h2><i class="fas fa-star"></i> 맞춤 추천</h2>
+                    <div class="recommendation-filters">
+                        <button class="filter-btn active" data-type="all">전체</button>
+                        <button class="filter-btn" data-type="restaurants">맛집</button>
+                        <button class="filter-btn" data-type="attractions">명소</button>
+                        <button class="filter-btn" data-type="hotels">숙소</button>
+                    </div>
+                </div>
+                <div id="recommendations-list" class="recommendations-grid"></div>
+            </div>
+        </section>
+
+        <!-- Budget Management Tab -->
+        <section id="budget-tab" class="tab-content">
+            <div class="container">
+                <div class="budget-header">
+                    <h2><i class="fas fa-wallet"></i> 예산 관리</h2>
+                </div>
+                <div class="budget-content">
+                    <div class="budget-summary">
+                        <div class="budget-card">
+                            <i class="fas fa-coins"></i>
+                            <div>
+                                <h3>총 예산</h3>
+                                <p class="amount" id="total-budget">₩0</p>
+                            </div>
+                        </div>
+                        <div class="budget-card">
+                            <i class="fas fa-credit-card"></i>
+                            <div>
+                                <h3>사용 예정</h3>
+                                <p class="amount" id="used-budget">₩0</p>
+                            </div>
+                        </div>
+                        <div class="budget-card">
+                            <i class="fas fa-piggy-bank"></i>
+                            <div>
+                                <h3>잔여 예산</h3>
+                                <p class="amount" id="remaining-budget">₩0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="budget-chart">
+                        <h3>예산 분배</h3>
+                        <canvas id="budget-chart-canvas"></canvas>
+                    </div>
+
+                    <div class="budget-breakdown">
+                        <h3>항목별 예산</h3>
+                        <div class="budget-items">
+                            <div class="budget-item">
+                                <span><i class="fas fa-plane"></i> 교통</span>
+                                <span class="budget-amount">₩0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span><i class="fas fa-hotel"></i> 숙박</span>
+                                <span class="budget-amount">₩0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span><i class="fas fa-utensils"></i> 식사</span>
+                                <span class="budget-amount">₩0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span><i class="fas fa-ticket-alt"></i> 관광</span>
+                                <span class="budget-amount">₩0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span><i class="fas fa-shopping-bag"></i> 쇼핑/기타</span>
+                                <span class="budget-amount">₩0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>경로를 계산하는 중...</p>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
 </body>
 </html>

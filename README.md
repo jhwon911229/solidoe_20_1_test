@@ -1,165 +1,216 @@
-# 시스템 리소스 모니터링 시스템
+# TripSync - 개인 맞춤형 여행 플래너 🌍✈️
 
-실시간 시스템 리소스 모니터링 및 PDF 리포트 생성 웹 애플리케이션
+**TripSync**는 사용자의 출발지, 목적지, 여행기간, 예산 정보를 기반으로 최적의 여행 루트와 추천지를 제공하는 통합 여행 개인화 애플리케이션입니다.
 
-## 기능
+![TripSync](https://img.shields.io/badge/TripSync-Travel%20Planner-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-- **실시간 모니터링**: CPU, 메모리, 디스크, 네트워크, 온도
-- **시각화 대시보드**: Chart.js 기반 실시간 그래프
-- **PDF 내보내기**: 브라우저에서 직접 PDF 생성
-- **자동 모니터링**: 5분간 자동 데이터 수집 및 HTML 보고서 생성
+## 주요 기능 ✨
 
-## 설치
+### 1. **여행 계획 만들기** 🗺️
+- 출발지와 목적지 검색 (Google Places API)
+- 여행 기간 및 예산 설정
+- 여행 선호도 선택 (문화/자연/맛집/쇼핑/액티비티)
+- 실시간 경로 계산 및 시각화
+
+### 2. **지도 시각화** 🌐
+- Google Maps 기반 경로 표시
+- 실시간 거리 및 소요시간 계산
+- 예상 이동 비용 산출
+- 대화형 지도 인터페이스
+
+### 3. **내 여행 관리** 🎒
+- 생성된 여행 목록 관리
+- 여행 상태 추적 (계획 중, 확정됨, 진행 중, 완료됨)
+- 여행 세부 정보 조회
+
+### 4. **맞춤 추천** ⭐
+- 목적지 주변 맛집 추천
+- 인기 관광 명소 추천
+- 숙소 정보 제공
+- 평점 및 가격 수준 표시
+
+### 5. **예산 관리** 💰
+- 총 예산 및 사용 예정 금액 추적
+- 항목별 예산 분배 (교통, 숙박, 식사, 관광, 기타)
+- 시각적 예산 차트
+- 잔여 예산 실시간 계산
+
+## 기술 스택 🛠️
+
+### Frontend
+- **HTML5**: 구조화된 마크업
+- **CSS3**: 반응형 디자인, 그라데이션, 애니메이션
+- **JavaScript (ES6+)**: 동적 인터랙션 및 API 통합
+
+### Backend
+- **Node.js**: 서버 런타임
+- **Express.js**: REST API 서버
+- **Axios**: HTTP 클라이언트
+
+### APIs
+- **Google Maps JavaScript API**: 지도 표시 및 경로 계산
+- **Google Places API**: 장소 검색 및 자동완성
+- **Google Directions API**: 경로 안내
+
+## 설치 및 실행 🚀
+
+### 1. 저장소 클론
+
+```bash
+git clone https://github.com/jhwon911229/solidoe_20_1_test.git
+cd solidoe_20_1_test
+```
+
+### 2. 패키지 설치
 
 ```bash
 npm install
 ```
 
-## 사용 방법
+### 3. 환경 변수 설정
 
-### 1. 실시간 대시보드
+`.env` 파일에 Google Maps API 키가 이미 설정되어 있습니다:
+
+```env
+PORT=3000
+GOOGLE_MAPS_API_KEY=AIzaSyAMGooquPgD4C4lNL9sEdKr--2DTCr8djk
+NODE_ENV=development
+```
+
+### 4. 서버 실행
 
 ```bash
 npm start
 ```
 
-브라우저에서 http://localhost:3000 접속
-
-### 2. 자동 모니터링 (5분)
+또는 개발 모드로 실행 (nodemon 사용):
 
 ```bash
-node auto-monitor.js
+npm run dev
 ```
 
-5분 후 HTML 보고서가 자동 생성됩니다.
-
-## 환경 제약사항
-
-### 샌드박스/컨테이너 환경
-
-이 애플리케이션이 샌드박스 또는 컨테이너 환경에서 실행되는 경우, 일부 시스템 정보에 제한적으로 접근할 수 있습니다:
-
-- **CPU 사용률**: 0% 또는 제한된 값으로 표시될 수 있음
-- **CPU 온도**: 대부분의 가상화 환경에서 0°C로 표시됨
-- **GPU 정보**: 가상 환경에서는 사용 불가
-
-이는 `systeminformation` 라이브러리가 호스트 시스템의 `/proc`, `/sys` 등의 시스템 파일에 접근이 제한되기 때문입니다.
-
-### 정상 작동 환경
-
-- 물리적 Linux/macOS/Windows 머신
-- 권한이 있는 VM (KVM, VMware 등)
-- Docker (--privileged 플래그 사용 시)
-
-## API 엔드포인트
-
-### GET /api/resources
-
-현재 시스템 리소스 정보를 JSON으로 반환
-
-```json
-{
-  "timestamp": "7:54:11 AM",
-  "cpu": {
-    "usage": "15.23",
-    "cores": 8,
-    "model": "Intel Core i7",
-    "speed": "3.2 GHz"
-  },
-  "memory": {
-    "used": "65.43",
-    "usedGB": "10.45",
-    "totalGB": "16.00",
-    "available": "34.57"
-  },
-  ...
-}
-```
-
-### GET /api/history
-
-히스토리 데이터 반환 (최근 300개 데이터 포인트)
-
-## 기술 스택
-
-### 백엔드
-- Node.js
-- Express.js
-- systeminformation
-
-### 프론트엔드
-- HTML5, CSS3, JavaScript (ES6+)
-- Chart.js - 데이터 시각화
-- html2canvas + jsPDF - PDF 생성
-
-## 프로젝트 구조
+### 5. 브라우저에서 접속
 
 ```
-├── server.js           # Express 백엔드 서버
-├── auto-monitor.js     # 자동 모니터링 스크립트
-├── public/
-│   ├── index.html      # 메인 대시보드
-│   ├── style.css       # 스타일링
-│   └── app.js          # 프론트엔드 로직
-├── package.json
-└── README.md
+http://localhost:3000
 ```
 
-## 보안 고려사항
+## 프로젝트 구조 📁
 
-⚠️ **중요**: 이 애플리케이션은 현재 개발/테스트 환경용입니다.
-
-프로덕션 환경에 배포하기 전에 다음 사항을 반드시 적용하세요:
-
-1. **인증 추가**: API 엔드포인트에 인증 메커니즘 구현
-2. **CORS 제한**: 특정 출처만 허용하도록 설정
-3. **Rate Limiting**: API 요청 제한
-4. **HTTPS**: SSL/TLS 인증서 적용
-5. **환경 변수**: 포트, 설정 등을 환경 변수로 관리
-
-상세한 보안 리뷰는 `CODE_REVIEW.md` 참조
-
-## 알려진 문제
-
-- **샌드박스 환경**: CPU 사용률과 온도가 0으로 표시될 수 있음
-- **권한 부족**: 일부 시스템 정보 접근 시 권한 필요
-- **브라우저 호환성**: PDF 생성은 최신 브라우저에서만 작동
-
-## 트러블슈팅
-
-### CPU 사용률이 0%로 표시됨
-
-샌드박스/컨테이너 환경에서 실행 중인 경우 정상입니다. 물리적 머신이나 권한 있는 VM에서 실행하세요.
-
-### 온도가 0°C로 표시됨
-
-가상화 환경에서는 하드웨어 센서에 직접 접근할 수 없어 정상적인 현상입니다.
-
-### 서버가 시작되지 않음
-
-```bash
-# 포트 3000이 이미 사용 중인지 확인
-lsof -i :3000
-
-# 프로세스 종료
-pkill -f "node server.js"
+```
+tripsync/
+├── public/                 # 프론트엔드 정적 파일
+│   ├── css/
+│   │   └── style.css      # 메인 스타일시트
+│   ├── js/
+│   │   └── app.js         # 메인 JavaScript 애플리케이션
+│   └── index.html         # 메인 HTML 페이지
+├── legacy/                # 기존 시스템 모니터 파일 (참고용)
+├── server.js              # Express 서버 및 API 엔드포인트
+├── package.json           # 프로젝트 메타데이터 및 의존성
+├── .env                   # 환경 변수
+└── README.md              # 프로젝트 문서
 ```
 
-## 라이선스
+## API 엔드포인트 📡
 
-MIT
+### 여행 관리
+- `GET /api/trips` - 모든 여행 목록 조회
+- `GET /api/trips/:id` - 특정 여행 조회
+- `POST /api/trips` - 새 여행 생성
+- `PUT /api/trips/:id` - 여행 정보 수정
+- `DELETE /api/trips/:id` - 여행 삭제
 
-## 기여
+### 경로 계산
+- `POST /api/routes/calculate` - 출발지와 목적지 간 경로 계산
 
-이슈와 풀 리퀘스트를 환영합니다!
+### 추천
+- `GET /api/recommendations` - 맞춤 추천 조회
 
-## 업데이트 내역
+### 장소 검색
+- `GET /api/places/search` - 장소 검색
+- `GET /api/places/:placeId` - 장소 상세 정보
 
-### v1.1.0 (2025-11-06)
-- 보안 개선: XSS 방어, 에러 처리 개선
-- 버그 수정: CPU usage NaN 문제 해결
-- 안정성 향상: Null 체크 강화
-- 코드 품질: 중복 코드 제거
+### 기타
+- `GET /api/config` - API 설정 조회
+- `GET /api/health` - 서버 상태 확인
 
-### v1.0.0
-- 초기 릴리스
+## 사용 방법 📖
+
+### 1. 여행 계획 생성
+
+1. **여행 계획** 탭에서 여행 제목 입력
+2. 출발지와 목적지를 검색하여 선택
+3. 출발일과 도착일 설정
+4. 예산 입력 (슬라이더 또는 직접 입력)
+5. 여행 선호도 선택
+6. **"여행 경로 탐색"** 버튼 클릭
+
+### 2. 지도에서 경로 확인
+
+- 생성된 경로가 지도에 표시됩니다
+- 거리, 소요시간, 예상 비용 확인 가능
+
+### 3. 내 여행 관리
+
+- **내 여행** 탭에서 생성된 여행 목록 확인
+- 각 여행의 상태 및 세부 정보 조회
+
+### 4. 추천 확인
+
+- **추천** 탭에서 목적지 주변 맛집, 명소, 숙소 확인
+- 필터를 사용하여 원하는 카테고리만 보기
+
+### 5. 예산 관리
+
+- **예산 관리** 탭에서 전체 예산 현황 확인
+- 항목별 예산 분배 차트 조회
+
+## 기능 시연 🎥
+
+### 메인 화면
+- 직관적인 네비게이션
+- 그라데이션 배경과 현대적인 디자인
+
+### 여행 계획 폼
+- Google Places 자동완성 기능
+- 실시간 예산 슬라이더
+- 여행 선호도 체크박스
+
+### 지도 시각화
+- 실시간 경로 표시
+- 출발지/목적지 마커
+- 경로 정보 패널
+
+## 향후 개발 계획 🔮
+
+- [ ] 사용자 인증 및 프로필 관리
+- [ ] AI 기반 일정 자동 생성
+- [ ] 실시간 날씨 정보 통합
+- [ ] 항공사/숙박 플랫폼 예약 연계
+- [ ] SNS 공유 기능
+- [ ] 사용자 리뷰 시스템
+- [ ] 다국어 지원
+- [ ] 모바일 앱 (React Native)
+- [ ] 오프라인 모드
+
+## 기여 방법 🤝
+
+1. 저장소 Fork
+2. 기능 브랜치 생성 (`git checkout -b feature/AmazingFeature`)
+3. 변경 사항 커밋 (`git commit -m 'Add some AmazingFeature'`)
+4. 브랜치 푸시 (`git push origin feature/AmazingFeature`)
+5. Pull Request 생성
+
+## 라이선스 📄
+
+이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 [LICENSE.md](LICENSE.md) 파일을 참조하세요.
+
+## 문의 및 지원 💬
+
+문제가 발생하거나 질문이 있으시면 [Issues](https://github.com/jhwon911229/solidoe_20_1_test/issues) 페이지를 이용해주세요.
+
+---
+
+**Made with ❤️ by TripSync Team**
